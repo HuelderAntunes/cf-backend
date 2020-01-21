@@ -3,5 +3,5 @@ from .views import UserViewSet, GroupViewSet
 
 router = DefaultRouter()
 
-router.register('group', GroupViewSet)
-router.register('user', UserViewSet)
+router.register('groups', GroupViewSet, 'group')
+router.register('users', UserViewSet, 'user')
