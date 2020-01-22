@@ -3,7 +3,7 @@ from backend.login.models import DefaultUser
 
 class ProjectType(models.Model):
     name = models.CharField(max_length=80)
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -54,7 +54,7 @@ class ProjectUser(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "%s to %s" % (self.role.name, self.project.name)
+        return "%s to %s of %s" % (self.user.username, self.role.name, self.project.name)
 
 class Donation(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
