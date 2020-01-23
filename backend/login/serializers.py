@@ -5,7 +5,7 @@ from .models import DefaultUser, ForgotPassword
 class DefaultUserSerializer(serializers.ModelSerializer):
     class Meta():
         model = DefaultUser
-        fields = ['first_name', 'last_name', 'phone', 'email','username','password',
+        fields = ['id','first_name', 'last_name', 'phone', 'email','username','password',
         'postalcode','address_line','address_complement','state','country','avatar',
         'biography','date_joined', 'updated_date']
 

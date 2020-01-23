@@ -4,7 +4,6 @@ from django.contrib.auth.models import AbstractUser, Group
 class DefaultUser(AbstractUser):
     phone = models.CharField(max_length=15, blank=True, null=True)
 
-    username = models.CharField(max_length=50, unique=True, null=False, blank=False)
     password = models.CharField(max_length=100, null=False, blank=False)
 
     postalcode = models.CharField(max_length=30, blank=True, null=True)
@@ -21,7 +20,7 @@ class DefaultUser(AbstractUser):
     date_joined = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return "%s %s" % (super(DefaultUser, self).first_name, super(DefaultUser, self).last_name)
+        return "%s" % (super(DefaultUser, self).username)
 
 class ForgotPassword(models.Model):
     user = models.OneToOneField(DefaultUser, on_delete=models.CASCADE, primary_key=True)
