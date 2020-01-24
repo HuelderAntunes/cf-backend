@@ -11,7 +11,8 @@ from rest_framework import views
 from rest_framework.response import Response 
 from .models import DefaultUser, ForgotPassword
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 
 class DefaultUserViewSet(ModelViewSet):
     queryset = DefaultUser.objects.all().order_by('-id')
@@ -68,20 +69,33 @@ class ForgotPasswordViewSet(ViewSet):
                 forgot.token = hashed_token
                 forgot.save()
 
-                send_mail(message=text_token,
-                subject="Reset Password", 
-                recipient_list=[forgot_pass.data["email"]],
-                html_message=text_token,
-                from_email="02630358ef-56e3a1@inbox.mailtrap.io"
-                )
+                # mail
+                subject = 'Password Reset'
+                sender = '02630358ef-56e3a1@inbox.mailtrap.io'
+                mail = EmailMultiAlternatives()
+                recipient = forgot_pass.data['email']
+
+                context = { 'first_name':  user.first_name,
+                           'token': text_token }
+
+                text_content = render_to_string('forgotpassword.txt', context,request=request)
+                html_content = render_to_string('forgotpassword.html', context, request=request)
+
+                email = EmailMultiAlternatives(subject=subject,
+                                               body=text_content,
+                                               from_email=sender,
+                                               to=[recipient],
+                                               reply_to=[sender])
+                email.attach_alternative(html_content, "text/html")
+                email.send(fail_silently=False)
 
                 return Response(token)
 
             except DefaultUser.DoesNotExist:
                 pass
 
-            return Response({'success': 'A link for password reset as been send to your email.'})
-        
+            return Response({'success': 'If user with provided email exists a link with password reset as been sent.'})
+
         return Response({'error': 'Invalid fields.'})
 
     @action(detail=False, methods=['post'])
@@ -95,7 +109,7 @@ class ForgotPasswordViewSet(ViewSet):
                 token = bytes(recover_pass.data["token"], 'utf-8')
                 user.set_password(recover_pass.data['new_password'])
                 forgot_password.delete()
-                return Response({'success': 'Password successful setted!'})
+                return Response({'success': 'Password successfully setted!'})
             except DefaultUser.DoesNotExist:
                 pass
             except ForgotPassword.DoesNotExist:
