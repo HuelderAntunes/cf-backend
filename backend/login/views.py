@@ -89,8 +89,6 @@ class ForgotPasswordViewSet(ViewSet):
                 email.attach_alternative(html_content, "text/html")
                 email.send(fail_silently=False)
 
-                return Response(token)
-
             except DefaultUser.DoesNotExist:
                 pass
 
@@ -107,9 +105,13 @@ class ForgotPasswordViewSet(ViewSet):
                 forgot_password = ForgotPassword.objects.get(user=user)
                 hashed = bytes(forgot_password.token, 'utf-8')
                 token = bytes(recover_pass.data["token"], 'utf-8')
-                user.set_password(recover_pass.data['new_password'])
-                forgot_password.delete()
-                return Response({'success': 'Password successfully setted!'})
+
+                if(bcrypt.checkpw(token, hashed)):
+                    user.set_password(recover_pass.data['new_password'])
+                    forgot_password.delete()
+                    return Response({'success': 'Password successfully setted!'})
+                else:
+                    return Response({'error': 'Invalid token!'})
             except DefaultUser.DoesNotExist:
                 pass
             except ForgotPassword.DoesNotExist:

@@ -7,9 +7,9 @@ class DefaultUserSerializer(serializers.ModelSerializer):
         model = DefaultUser
         fields = ['id','first_name', 'last_name', 'phone', 'email','username','password',
         'postalcode','address_line','address_complement','state','country','avatar',
-        'biography','date_joined', 'updated_date', 'validated_email']
+        'date_of_birth','biography','date_joined', 'updated_date', 'validated_email']
 
-        read_only_fields = ['date_joined','updated_date']
+        read_only_fields = ['date_joined','updated_date', 'validated_email']
 
         extra_kwargs = {'password': {'write_only': True}}
 

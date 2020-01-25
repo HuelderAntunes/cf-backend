@@ -14,7 +14,7 @@ class DefaultUser(AbstractUser):
     email = models.EmailField(unique=True, null=False, blank=False)
     avatar = models.URLField(blank=True, null=True)
     biography = models.CharField(max_length=200,null=True, blank=True)
-
+    date_of_birth = models.DateField(null=True, blank=True)
     updated_date = models.DateTimeField(auto_now=True)
 
     date_joined = models.DateTimeField(auto_now_add=True)
