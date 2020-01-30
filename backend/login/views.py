@@ -8,11 +8,12 @@ from rest_framework import permissions, status
 from rest_framework import mixins
 from .serializers import *
 from rest_framework import views
-from rest_framework.response import Response 
+from rest_framework.response import Response
 from .models import DefaultUser, ForgotPassword
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
+
 
 class DefaultUserViewSet(ModelViewSet):
     queryset = DefaultUser.objects.all().order_by('-id')
@@ -37,6 +38,7 @@ class DefaultUserViewSet(ModelViewSet):
         user.set_password(user.password)
         user.save()
 
+
 class SessionViewSet(ViewSet):
     def create(self, request):
         serialized = SessionSerializer(data=request.data)
@@ -49,12 +51,13 @@ class SessionViewSet(ViewSet):
                 if(users[0].check_password(password)):
                     refresh = RefreshToken.for_user(users[0])
                     return Response({
-                                        'refresh': str(refresh),
-                                        'access': str(refresh.access_token)
-                                    }, status.HTTP_200_OK)
+                        'refresh': str(refresh),
+                        'access': str(refresh.access_token)
+                    }, status.HTTP_200_OK)
 
             return Response({'error': 'The username or password is incorrect.'}, status.HTTP_400_BAD_REQUEST)
         return Response({'error': 'Invalid fields.'}, status.HTTP_400_BAD_REQUEST)
+
 
 class ForgotPasswordViewSet(ViewSet):
     def create(self, request):
@@ -64,8 +67,10 @@ class ForgotPasswordViewSet(ViewSet):
                 user = DefaultUser.objects.get(email=forgot_pass.data["email"])
                 text_token = str(uuid4())
                 token = bytes(text_token, 'utf-8')
-                hashed_token = str(bcrypt.hashpw(token, bcrypt.gensalt()), 'utf-8')
-                forgot, created = ForgotPassword.objects.get_or_create(user=user)
+                hashed_token = str(bcrypt.hashpw(
+                    token, bcrypt.gensalt()), 'utf-8')
+                forgot, created = ForgotPassword.objects.get_or_create(
+                    user=user)
                 forgot.token = hashed_token
                 forgot.save()
 
@@ -75,11 +80,13 @@ class ForgotPasswordViewSet(ViewSet):
                 mail = EmailMultiAlternatives()
                 recipient = forgot_pass.data['email']
 
-                context = { 'first_name':  user.first_name,
-                           'token': text_token }
+                context = {'first_name':  user.first_name,
+                           'token': text_token}
 
-                text_content = render_to_string('forgotpassword.txt', context,request=request)
-                html_content = render_to_string('forgotpassword.html', context, request=request)
+                text_content = render_to_string(
+                    'forgotpassword.txt', context, request=request)
+                html_content = render_to_string(
+                    'forgotpassword.html', context, request=request)
 
                 email = EmailMultiAlternatives(subject=subject,
                                                body=text_content,
@@ -101,7 +108,8 @@ class ForgotPasswordViewSet(ViewSet):
         recover_pass = RecoverPasswordSerializer(data=request.data)
         if(recover_pass.is_valid()):
             try:
-                user = DefaultUser.objects.get(email=recover_pass.data['email'])
+                user = DefaultUser.objects.get(
+                    email=recover_pass.data['email'])
                 forgot_password = ForgotPassword.objects.get(user=user)
                 hashed = bytes(forgot_password.token, 'utf-8')
                 token = bytes(recover_pass.data["token"], 'utf-8')
